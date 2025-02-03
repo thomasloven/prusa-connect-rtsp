@@ -50,7 +50,7 @@ def main():
     if not snapshot_api_url:
         raise ValueError("ENVVAR PRUSA_CONNECT_URL is required")
     fingerprint = os.getenv("PRUSA_CONNECT_FINGERPRINT").strip().strip("\"'")
-    if not rtsp_url:
+    if not fingerprint:
         raise ValueError("ENVVAR PRUSA_CONNECT_FINGERPRINT is required. Set it to a random UUID.")
     api_token = os.getenv("PRUSA_CONNECT_TOKEN").strip().strip("\"'")
     if not api_token:
@@ -62,8 +62,9 @@ def main():
             if success:
                 upload_response = upload_image(snapshot_api_url, fingerprint, api_token, image.data)
 
-                if 299 < upload_response.status_code < 200:
+                if not (200 < upload_response.status_code < 299):
                     logger.error("Failed to upload image to prusa connect")
+                    logger.debug(str(upload_response.content))
                 else:
                     logger.debug("Image uploaded")
             else:
